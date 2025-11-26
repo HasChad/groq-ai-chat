@@ -9,10 +9,13 @@ use std::io::{self, Stdout, Write};
 use crate::{App, Popup, popups::*};
 
 pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
+    let chat_box = (app.size.0, app.size.1 - 5);
+    let message_box = (app.size.0, 5);
+
     draw_box_with_title(
         stdout,
-        app.size.0,
-        app.size.1 - 5,
+        chat_box.0,
+        chat_box.1,
         0,
         0,
         "Chat".into(),
@@ -21,10 +24,10 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
 
     draw_box_with_title(
         stdout,
-        app.size.0,
-        5,
+        message_box.0,
+        message_box.1,
         0,
-        app.size.1 - 5,
+        chat_box.1,
         "Message".into(),
         Color::White,
     )?;
@@ -53,10 +56,18 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
             )?;
         }
 
-        let wrapped_text = textwrap::fill(&message.content, app.size.0 as usize - 7);
+        let wrapped_text = textwrap::wrap(&message.content, app.size.0 as usize - 7);
+        let max_line = chat_box.1 as usize;
 
-        queue!(stdout, Print(wrapped_text), MoveToNextLine(1), MoveRight(1))?;
-        queue!(stdout, MoveToNextLine(1), MoveRight(1))?;
+        if max_line < wrapped_text.len() {
+            for text in &wrapped_text[0..max_line] {
+                queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
+            }
+        } else {
+            for text in wrapped_text.iter() {
+                queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
+            }
+        }
     }
 
     match &app.popup {

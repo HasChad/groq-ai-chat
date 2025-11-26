@@ -18,7 +18,7 @@ pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
     } else {
         match event.code {
             KeyCode::Char(c) => app.input.push(c),
-            KeyCode::Enter => process_input(app),
+            KeyCode::Enter => process_input(stdout, app),
             KeyCode::Backspace => {
                 if app.input.len() != 0 {
                     app.input.pop();
@@ -33,7 +33,7 @@ pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
     }
 }
 
-pub fn process_input(app: &mut App) {
+pub fn process_input(stdout: &mut Stdout, app: &mut App) {
     if app.input.is_empty() {
         return;
     }
@@ -66,7 +66,7 @@ pub fn process_input(app: &mut App) {
     app.input.clear();
     manage_history(&mut app.messages);
 
-    match send_chat_request(app) {
+    match send_chat_request(stdout, app) {
         Ok(reply) => app.messages.push(Message::ai_reply(reply)),
         Err(ChatError::Network) => {
             app.popup = Popup::Error("Network error: Please check your internet connection.".into())

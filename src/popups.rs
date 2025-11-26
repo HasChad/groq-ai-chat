@@ -1,8 +1,8 @@
 use std::io::{self, Stdout};
 
 use crossterm::{
-    cursor::MoveTo,
-    queue,
+    cursor::{Hide, MoveTo},
+    execute,
     style::{Color, Print, SetForegroundColor, Stylize},
 };
 
@@ -24,7 +24,7 @@ pub fn popup_welcome(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
         Color::Cyan,
     )?;
 
-    queue!(
+    execute!(
         stdout,
         MoveTo(x_pos + 1, y_pos + 1),
         SetForegroundColor(Color::Yellow),
@@ -59,7 +59,7 @@ pub fn popup_help(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
         Color::Blue,
     )?;
 
-    queue!(
+    execute!(
         stdout,
         MoveTo(x_pos + 1, y_pos + 1),
         SetForegroundColor(Color::Yellow),
@@ -102,7 +102,7 @@ pub fn popup_status(
     let user_messages = messages.iter().filter(|m| m.role == "user").count();
     let assistant_messages = messages.iter().filter(|m| m.role == "assistant").count();
 
-    queue!(
+    execute!(
         stdout,
         SetForegroundColor(Color::Yellow),
         MoveTo(x_pos + 1, y_pos + 1),
@@ -114,6 +114,36 @@ pub fn popup_status(
         Print(format!("- User messages: {}", user_messages)),
         MoveTo(x_pos + 1, y_pos + 4),
         Print(format!("- AI responses: {}", assistant_messages)),
+        SetForegroundColor(Color::Reset),
+    )?;
+
+    Ok(())
+}
+
+pub fn popup_sending_message(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
+    let msg = "Sending message";
+
+    let x_size = msg.len() as u16 + 2;
+    let y_size = 3;
+    let x_pos = (size.0 - x_size) / 2;
+    let y_pos = (size.1 - y_size) / 2;
+
+    draw_box_with_title(
+        stdout,
+        x_size,
+        y_size,
+        x_pos,
+        y_pos,
+        "Info".into(),
+        Color::DarkBlue,
+    )?;
+
+    execute!(
+        stdout,
+        Hide,
+        MoveTo(x_pos + 1, y_pos + 1),
+        SetForegroundColor(Color::Yellow),
+        Print(msg),
         SetForegroundColor(Color::Reset),
     )?;
 
@@ -136,7 +166,7 @@ pub fn popup_error(stdout: &mut Stdout, size: &(u16, u16), msg: &str) -> io::Res
         Color::Red,
     )?;
 
-    queue!(
+    execute!(
         stdout,
         MoveTo(x_pos + 1, y_pos + 1),
         SetForegroundColor(Color::Yellow),
