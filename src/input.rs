@@ -3,7 +3,7 @@ use crossterm::{
     event::{KeyCode, KeyEvent},
     queue,
 };
-use std::io::Stdout;
+use std::io::{Stdout, Write};
 
 use crate::{
     App, Popup,
@@ -73,11 +73,19 @@ pub fn process_input(stdout: &mut Stdout, app: &mut App) {
     }
 
     app.messages.push(Message::user_input(app.input.clone()));
+
+    let mut serialized = serde_json::to_string(&app.input).unwrap();
+    let _ = app.file.write_all(serialized.as_bytes());
+
     app.input.clear();
     manage_history(&mut app.messages);
 
     match send_chat_request(stdout, app) {
-        Ok(reply) => app.messages.push(Message::ai_reply(reply)),
+        Ok(reply) => {
+            serialized = serde_json::to_string(&reply).unwrap();
+            let _ = app.file.write_all(serialized.as_bytes());
+            app.messages.push(Message::ai_reply(reply));
+        }
         Err(ChatError::EnvVar) => app.popup = Popup::Error("Please check your AI model".into()),
         Err(ChatError::Network) => {
             app.popup = Popup::Error("Network error: Please check your internet connection.".into())

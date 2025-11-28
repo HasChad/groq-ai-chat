@@ -11,6 +11,7 @@ use dotenvy::dotenv;
 use reqwest::blocking::Client;
 use std::{
     env,
+    fs::File,
     io::{self},
     process,
 };
@@ -41,6 +42,7 @@ pub struct App {
     client: Client,
     input: String,
     popup: Popup,
+    file: File,
 }
 
 fn main() -> io::Result<()> {
@@ -58,6 +60,11 @@ fn main() -> io::Result<()> {
         }
     };
 
+    let mut file = match File::open("messages.json") {
+        Ok(file) => file,
+        Err(_) => File::create("messages.json").unwrap(),
+    };
+
     let mut app = App {
         run: true,
         messages: vec![system_message],
@@ -66,6 +73,7 @@ fn main() -> io::Result<()> {
         input: String::new(),
         size: size()?,
         popup: Popup::Welcome,
+        file,
     };
 
     execute!(
