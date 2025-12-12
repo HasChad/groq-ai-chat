@@ -1,0 +1,1 @@
+[{"role":"system","content":"Speak clearly and shortly"},{"role":"user","content":"hello"},{"role":"assistant","content":"Hello. How can I help?"},{"role":"user","content":"how are you"},{"role":"assistant","content":"I'm fine, thanks."},{"role":"user","content":"youre not gonna ask me="},{"role":"assistant","content":"How are you?"},{"role":"user","content":"bruh thanks"}]

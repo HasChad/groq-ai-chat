@@ -39,35 +39,25 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
         SetSize(app.size.0 - 2, app.size.1 - 2)
     )?;
 
+    // chat text
+    let mut string_message = String::new();
+
     for message in app.messages.iter() {
         if message.role == "user" || message.role == "system" {
-            queue!(
-                stdout,
-                SetForegroundColor(Color::Blue),
-                Print("You: "),
-                SetForegroundColor(Color::Reset),
-            )?;
+            string_message.push_str("You: ");
         } else if message.role == "assistant" {
-            queue!(
-                stdout,
-                SetForegroundColor(Color::DarkRed),
-                Print("AI: "),
-                SetForegroundColor(Color::Reset),
-            )?;
+            string_message.push_str("AI: ");
         }
 
-        let wrapped_text = textwrap::wrap(&message.content, app.size.0 as usize - 7);
-        let max_line = chat_box.1 as usize;
+        string_message.push_str(&message.content);
+        string_message.push_str("\n");
+    }
 
-        if max_line < wrapped_text.len() {
-            for text in &wrapped_text[0..max_line] {
-                queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
-            }
-        } else {
-            for text in wrapped_text.iter() {
-                queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
-            }
-        }
+    let wrapped_text = textwrap::wrap(&string_message, app.size.0 as usize - 7);
+    let max_line = chat_box.1 as usize - 2;
+
+    for text in &wrapped_text[0..max_line] {
+        queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
     }
 
     match &app.popup {

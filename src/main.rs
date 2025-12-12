@@ -11,7 +11,7 @@ use dotenvy::dotenv;
 use reqwest::blocking::Client;
 use std::{
     env,
-    fs::File,
+    fs::{self, File},
     io::{self},
     process,
 };
@@ -24,6 +24,8 @@ mod tui;
 use ai_logic::*;
 use input::*;
 use tui::*;
+
+const FILE_PATH: &str = "messages.json";
 
 #[derive(PartialEq)]
 pub enum Popup {
@@ -42,7 +44,6 @@ pub struct App {
     client: Client,
     input: String,
     popup: Popup,
-    file: File,
 }
 
 fn main() -> io::Result<()> {
@@ -60,20 +61,33 @@ fn main() -> io::Result<()> {
         }
     };
 
-    let mut file = match File::open("messages.json") {
-        Ok(file) => file,
-        Err(_) => File::create("messages.json").unwrap(),
+    let mut messages: Vec<Message> = vec![];
+
+    match File::open(FILE_PATH) {
+        Ok(_) => {
+            let mut json_data = fs::read_to_string(FILE_PATH).unwrap();
+
+            if json_data.is_empty() {
+                let json_string = serde_json::to_string(&vec![system_message]).unwrap();
+                fs::write(FILE_PATH, json_string).unwrap();
+                json_data = fs::read_to_string(FILE_PATH).unwrap();
+            }
+
+            messages = serde_json::from_str(&json_data).unwrap();
+        }
+        Err(_) => {
+            File::create(FILE_PATH).unwrap();
+        }
     };
 
     let mut app = App {
         run: true,
-        messages: vec![system_message],
+        messages,
         api_key,
         client: Client::new(),
         input: String::new(),
         size: size()?,
         popup: Popup::Welcome,
-        file,
     };
 
     execute!(

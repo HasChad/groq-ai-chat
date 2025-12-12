@@ -3,10 +3,10 @@ use crossterm::{
     event::{KeyCode, KeyEvent},
     queue,
 };
-use std::io::{Stdout, Write};
+use std::{fs, io::Stdout};
 
 use crate::{
-    App, Popup,
+    App, FILE_PATH, Popup,
     ai_logic::{ChatError, Message, manage_history, send_chat_request},
 };
 
@@ -74,17 +74,15 @@ pub fn process_input(stdout: &mut Stdout, app: &mut App) {
 
     app.messages.push(Message::user_input(app.input.clone()));
 
-    let mut serialized = serde_json::to_string(&app.input).unwrap();
-    let _ = app.file.write_all(serialized.as_bytes());
-
     app.input.clear();
     manage_history(&mut app.messages);
 
     match send_chat_request(stdout, app) {
         Ok(reply) => {
-            serialized = serde_json::to_string(&reply).unwrap();
-            let _ = app.file.write_all(serialized.as_bytes());
-            app.messages.push(Message::ai_reply(reply));
+            app.messages.push(Message::ai_reply(reply.clone()));
+
+            let json_string = serde_json::to_string(&app.messages).unwrap();
+            fs::write(FILE_PATH, json_string).unwrap();
         }
         Err(ChatError::EnvVar) => app.popup = Popup::Error("Please check your AI model".into()),
         Err(ChatError::Network) => {
