@@ -6,8 +6,9 @@ use crossterm::{
 use std::{fs, io::Stdout};
 
 use crate::{
-    App, FILE_PATH, Popup,
+    App, Popup,
     ai_logic::{ChatError, Message, manage_history, send_chat_request},
+    app::FILE_PATH,
 };
 
 pub const MAX_INPUT_LENGTH: usize = 1000;

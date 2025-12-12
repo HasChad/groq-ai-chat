@@ -52,7 +52,7 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
         }
 
         string_message.push_str(&message.content);
-        string_message.push_str("\n");
+        string_message.push_str("\n\n");
     }
 
     let wrapped_text = textwrap::wrap(&string_message, app.size.0 as usize - 7);

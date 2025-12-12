@@ -4,28 +4,21 @@ use crossterm::{
     execute, queue,
     terminal::{
         Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, SetTitle, disable_raw_mode,
-        enable_raw_mode, size,
+        enable_raw_mode,
     },
 };
 use dotenvy::dotenv;
-use reqwest::blocking::Client;
-use std::{
-    env,
-    fs::{self, File},
-    io::{self},
-    process,
-};
+use std::io::{self};
 
 mod ai_logic;
+mod app;
 mod input;
 mod popups;
 mod tui;
 
-use ai_logic::*;
+use app::*;
 use input::*;
 use tui::*;
-
-const FILE_PATH: &str = "messages.json";
 
 #[derive(PartialEq)]
 pub enum Popup {
@@ -36,59 +29,10 @@ pub enum Popup {
     Error(String),
 }
 
-pub struct App {
-    run: bool,
-    size: (u16, u16),
-    messages: Vec<Message>,
-    api_key: String,
-    client: Client,
-    input: String,
-    popup: Popup,
-}
-
 fn main() -> io::Result<()> {
     dotenv().ok();
     let mut stdout = io::stdout();
-    let system_message = Message::ai_character();
-
-    let api_key = match env::var("GROQ_API_KEY") {
-        Ok(env) => env,
-        Err(_) => {
-            println!(
-                "\nGROQ_API_KEY environment variable not found. Please set it in your .env file!"
-            );
-            process::exit(1);
-        }
-    };
-
-    let mut messages: Vec<Message> = vec![];
-
-    match File::open(FILE_PATH) {
-        Ok(_) => {
-            let mut json_data = fs::read_to_string(FILE_PATH).unwrap();
-
-            if json_data.is_empty() {
-                let json_string = serde_json::to_string(&vec![system_message]).unwrap();
-                fs::write(FILE_PATH, json_string).unwrap();
-                json_data = fs::read_to_string(FILE_PATH).unwrap();
-            }
-
-            messages = serde_json::from_str(&json_data).unwrap();
-        }
-        Err(_) => {
-            File::create(FILE_PATH).unwrap();
-        }
-    };
-
-    let mut app = App {
-        run: true,
-        messages,
-        api_key,
-        client: Client::new(),
-        input: String::new(),
-        size: size()?,
-        popup: Popup::Welcome,
-    };
+    let mut app = App::init()?;
 
     execute!(
         stdout,
