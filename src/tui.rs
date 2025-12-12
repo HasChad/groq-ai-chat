@@ -43,10 +43,12 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
     let mut string_message = String::new();
 
     for message in app.messages.iter() {
-        if message.role == "user" || message.role == "system" {
+        if message.role == "user" {
             string_message.push_str("You: ");
         } else if message.role == "assistant" {
             string_message.push_str("AI: ");
+        } else {
+            continue;
         }
 
         string_message.push_str(&message.content);
@@ -54,7 +56,11 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
     }
 
     let wrapped_text = textwrap::wrap(&string_message, app.size.0 as usize - 7);
-    let max_line = chat_box.1 as usize - 2;
+    let max_line = if wrapped_text.len() > chat_box.1 as usize - 2 {
+        chat_box.1 as usize - 2
+    } else {
+        wrapped_text.len()
+    };
 
     for text in &wrapped_text[0..max_line] {
         queue!(stdout, Print(text), MoveToNextLine(1), MoveRight(1))?;
