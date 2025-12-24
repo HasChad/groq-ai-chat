@@ -2,7 +2,6 @@ use crossterm::{
     cursor::{MoveRight, MoveTo, MoveToNextLine, Show},
     execute, queue,
     style::{Color, Print, SetForegroundColor},
-    terminal::{EnableLineWrap, SetSize},
 };
 use std::io::{self, Stdout, Write};
 
@@ -32,12 +31,7 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
         Color::White,
     )?;
 
-    queue!(
-        stdout,
-        MoveTo(1, 1),
-        EnableLineWrap,
-        SetSize(app.size.0 - 2, app.size.1 - 2)
-    )?;
+    queue!(stdout, MoveTo(1, 1))?;
 
     // chat text
     let mut string_message = String::new();
