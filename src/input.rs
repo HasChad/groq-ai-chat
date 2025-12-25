@@ -3,7 +3,10 @@ use crossterm::{
     event::{KeyCode, KeyEvent},
     queue,
 };
-use std::{fs, io::Stdout};
+use std::{
+    fs,
+    io::{BufWriter, Stdout},
+};
 
 use crate::{
     App, Popup,
@@ -13,7 +16,7 @@ use crate::{
 
 pub const MAX_INPUT_LENGTH: usize = 1000;
 
-pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
+pub fn input_controller(stdout: &mut BufWriter<Stdout>, event: KeyEvent, app: &mut App) {
     if app.popup != Popup::None {
         if event.code == KeyCode::Char('q') {
             app.popup = Popup::None;
@@ -42,7 +45,7 @@ pub fn input_controller(stdout: &mut Stdout, event: KeyEvent, app: &mut App) {
     }
 }
 
-pub fn process_input(stdout: &mut Stdout, app: &mut App) {
+pub fn process_input(stdout: &mut BufWriter<Stdout>, app: &mut App) {
     if app.input.is_empty() {
         return;
     }

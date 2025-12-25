@@ -3,11 +3,11 @@ use crossterm::{
     execute, queue,
     style::{Color, Print, SetForegroundColor},
 };
-use std::io::{self, Stdout, Write};
+use std::io::{self, BufWriter, Stdout, Write};
 
 use crate::{App, Popup, input::MAX_INPUT_LENGTH, popups::*};
 
-pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
+pub fn render(stdout: &mut BufWriter<Stdout>, app: &mut App) -> io::Result<()> {
     let chat_box = (app.size.0, app.size.1 - 5);
     let message_box = (app.size.0, 5);
 
@@ -100,21 +100,22 @@ pub fn render(stdout: &mut Stdout, app: &mut App) -> io::Result<()> {
     Ok(())
 }
 
-pub fn draw_box(
-    stdout: &mut Stdout,
+pub fn draw_box_with_title(
+    stdout: &mut BufWriter<Stdout>,
     width: u16,
     height: u16,
     x_pos: u16,
     y_pos: u16,
+    title: String,
     color: Color,
 ) -> io::Result<()> {
-    queue!(stdout, SetForegroundColor(color))?;
-
     queue!(
         stdout,
+        SetForegroundColor(color),
         MoveTo(x_pos, y_pos),
         Print("┏"),
-        Print("━".repeat((width - 2) as usize)),
+        Print(format!(" {} ", title)),
+        Print("━".repeat((width - 4 - title.len() as u16) as usize)),
         Print("┓")
     )?;
 
@@ -133,36 +134,14 @@ pub fn draw_box(
         MoveTo(x_pos, y_pos + height - 1),
         Print("┗"),
         Print("━".repeat((width - 2) as usize)),
-        Print("┛")
-    )?;
-
-    queue!(stdout, SetForegroundColor(Color::Reset))?;
-    Ok(())
-}
-
-pub fn draw_box_with_title(
-    stdout: &mut Stdout,
-    width: u16,
-    height: u16,
-    x_pos: u16,
-    y_pos: u16,
-    title: String,
-    color: Color,
-) -> io::Result<()> {
-    draw_box(stdout, width, height, x_pos, y_pos, color)?;
-
-    queue!(
-        stdout,
-        SetForegroundColor(color),
-        MoveTo(x_pos + 3, y_pos),
-        Print(format!(" {} ", title)),
+        Print("┛"),
         SetForegroundColor(Color::Reset)
     )?;
 
     Ok(())
 }
 
-pub fn screen_size_warning(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
+pub fn screen_size_warning(stdout: &mut BufWriter<Stdout>, size: &(u16, u16)) -> io::Result<()> {
     let raw_text = format!(
         "Terminal size is too low! Width: {}, Height: {}
 Set your terminal size to minimum Width: 80, Height: 20",

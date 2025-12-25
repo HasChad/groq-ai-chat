@@ -23,7 +23,6 @@ use tui::*;
 fn main() -> io::Result<()> {
     dotenv().ok();
     let mut stdout = BufWriter::with_capacity(640000, stdout());
-    let mut stdout = stdout.get_mut();
     let mut app = App::init()?;
 
     execute!(

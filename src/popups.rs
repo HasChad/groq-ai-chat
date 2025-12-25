@@ -1,4 +1,4 @@
-use std::io::{self, Stdout};
+use std::io::{self, BufWriter, Stdout};
 
 use crossterm::{
     cursor::{Hide, MoveTo},
@@ -8,7 +8,7 @@ use crossterm::{
 
 use crate::{ai_logic::Message, tui::draw_box_with_title};
 
-pub fn popup_welcome(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
+pub fn popup_welcome(stdout: &mut BufWriter<Stdout>, size: &(u16, u16)) -> io::Result<()> {
     let x_size = 38;
     let y_size = 6;
     let x_pos = (size.0 - x_size) / 2;
@@ -43,7 +43,7 @@ pub fn popup_welcome(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
     Ok(())
 }
 
-pub fn popup_help(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
+pub fn popup_help(stdout: &mut BufWriter<Stdout>, size: &(u16, u16)) -> io::Result<()> {
     let x_size = 52;
     let y_size = 7;
     let x_pos = (size.0 - x_size) / 2;
@@ -80,7 +80,7 @@ pub fn popup_help(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
 }
 
 pub fn popup_status(
-    stdout: &mut Stdout,
+    stdout: &mut BufWriter<Stdout>,
     size: &(u16, u16),
     messages: &[Message],
 ) -> io::Result<()> {
@@ -120,7 +120,7 @@ pub fn popup_status(
     Ok(())
 }
 
-pub fn popup_sending_message(stdout: &mut Stdout, size: &(u16, u16)) -> io::Result<()> {
+pub fn popup_sending_message(stdout: &mut BufWriter<Stdout>, size: &(u16, u16)) -> io::Result<()> {
     let msg = "Sending message";
 
     let x_size = msg.len() as u16 + 2;
@@ -150,7 +150,7 @@ pub fn popup_sending_message(stdout: &mut Stdout, size: &(u16, u16)) -> io::Resu
     Ok(())
 }
 
-pub fn popup_error(stdout: &mut Stdout, size: &(u16, u16), msg: &str) -> io::Result<()> {
+pub fn popup_error(stdout: &mut BufWriter<Stdout>, size: &(u16, u16), msg: &str) -> io::Result<()> {
     let x_size = msg.len() as u16 + 2;
     let y_size = 3;
     let x_pos = (size.0 - x_size) / 2;
