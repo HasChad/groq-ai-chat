@@ -71,7 +71,7 @@ impl App {
             client: Client::new(),
             input: String::new(),
             size: size()?,
-            popup: Popup::None,
+            popup: Popup::Welcome,
             scroll: 0,
         })
     }
