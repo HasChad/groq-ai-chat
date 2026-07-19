@@ -32,8 +32,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     );
 
     let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight).track_symbol(Some("┇"));
-    let vertical_scroll =
-        app.scroll as usize + (app.top_area.height * app.scroll / app.max_scroll) as usize;
+
+    let result: usize = match (app.top_area.height * app.scroll).checked_div(app.max_scroll) {
+        Some(val) => val as usize,
+        None => 0,
+    };
+    let vertical_scroll = app.scroll as usize + result;
     let mut scrollbar_state = ScrollbarState::new((app.max_scroll + app.top_area.height) as usize)
         .position(vertical_scroll);
 
