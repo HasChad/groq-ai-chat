@@ -13,5 +13,3 @@ $ cargo build run
 ```
 
 Make sure you have right API key in your .env file
-
-
